@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Ranked Results</title></head>
+<body>
+    <h1>Ranked Candidates</h1>
+    <table border="1" cellpadding="8">
+        <tr><th>Rank</th><th>File</th><th>Score</th><th>Matched Skills</th><th>Missing Skills</th></tr>
+        {% for r in ranked %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ r.filename }}</td>
+            <td>{{ r.score }}</td>
+            <td>{{ r.matched | join(", ") }}</td>
+            <td>{{ r.missing | join(", ") }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Ask about candidates</h2>
+    <form method="POST" action="/chat">
+        <input type="text" name="question" size="60"
+               placeholder="e.g. Who has experience in Python with over 2 years experience?">
+        <button type="submit">Ask</button>
+    </form>
+    {% if answer %}
+        <pre>{{ answer }}</pre>
+    {% endif %}
+</body>
+</html>

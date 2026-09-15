@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Resume Matcher - Job Description</title></head>
+<body>
+    <h1>Enter Job Description</h1>
+
+    <form method="POST" action="/jd">
+        <textarea name="jd_text" rows="10" cols="80"
+                  placeholder="Paste the job description here..." required></textarea>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if extracted %}
+        <h2>Extracted from JD:</h2>
+        <p><strong>Skills found:</strong> {{ extracted.skills | join(", ") }}</p>
+        <p><strong>Minimum experience:</strong> {{ extracted.min_experience }} years</p>
+    {% endif %}
+</body>
+</html>

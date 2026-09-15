@@ -1,6 +1,8 @@
 Flask
-Flask-SQLAlchemy Flask-Migrate
-pdfplumber pytesseract pdf2image
-
-
-
+Flask-SQLAlchemy
+pdfplumber
+pytesseract
+pdf2image
+sentence-transformers
+numpy
+groq
