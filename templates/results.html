@@ -2,10 +2,11 @@
 {% block content %}
     <h1>Step 3: Ranked Candidates</h1>
     <table border="1" cellpadding="8">
-        <tr><th>Rank</th><th>File</th><th>Score</th><th>Matched Skills</th><th>Missing Skills</th></tr>
+        <tr><th>Rank</th><th>Candidate</th><th>File</th><th>Score</th><th>Matched Skills</th><th>Missing Skills</th></tr>
         {% for r in ranked %}
         <tr>
             <td>{{ loop.index }}</td>
+            <td>{{ r.name }}</td>
             <td>{{ r.filename }}</td>
             <td>{{ r.score }}</td>
             <td>{{ r.matched | join(", ") }}</td>

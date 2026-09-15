@@ -17,7 +17,7 @@ import re
 # Add more terms below as needed for your test resumes/JDs.
 SKILL_KEYWORDS = [
     # Tech / data
-    "python", "java", "javascript", "sql", "django", "flask",
+    "python", "java", "javascript", "sql", "generative ai", "agentic ai","langchain", "langgraph","data analysis", "data science","django", "flask", "fastapi"
     "react", "node.js", "tensorflow", "pytorch", "nlp",
     "machine learning", "deep learning", "aws", "docker", "kubernetes",
     "git", "html", "css", "c++", "excel", "power bi", "tableau",
@@ -50,6 +50,31 @@ def extract_skills(text):
         if skill in text_lower:
             found.append(skill)
     return found
+
+
+def extract_name(text):
+    """
+    Heuristic: a resume's name is almost always one of the first few lines,
+    written in Title Case, with no digits or '@' (rules out phone/email lines).
+    Returns None if nothing looks like a name — caller should fall back to
+    the filename in that case.
+    """
+    if not text:
+        return None
+
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+
+    for line in lines[:6]:  # only check the first few lines
+        if "@" in line or any(ch.isdigit() for ch in line):
+            continue  # skip emails, phone numbers, addresses with numbers
+
+        words = line.split()
+        if 1 <= len(words) <= 4:
+            # Title Case check: each word starts with a capital letter
+            if all(w[0].isupper() for w in words if w[0].isalpha()):
+                return line
+
+    return None  # nothing matched — caller falls back to filename
 
 
 def extract_min_experience_years(text):

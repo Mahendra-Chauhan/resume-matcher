@@ -6,7 +6,7 @@ import os
 from flask import Flask, request, render_template
 from models import db, Resume, JobDescription
 from services.extractor import extract_text
-from services.parser import extract_skills, extract_min_experience_years
+from services.parser import extract_skills, extract_min_experience_years, extract_name
 from services.matcher import compute_match_score, embedding_to_bytes
 from services.chatbot import answer_query
 
@@ -97,7 +97,10 @@ def rank():
         r.embedding = embedding_to_bytes(resume_vec)
         db.session.commit()
 
+        candidate_name = extract_name(r.raw_text or "") or r.filename
+
         ranked.append({
+            "name": candidate_name,
             "filename": r.filename,
             "score": score,
             "matched": matched,
@@ -117,6 +120,7 @@ def chat():
     for r in resumes:
         resume_data.append({
             "filename": r.filename,
+            "name": extract_name(r.raw_text or "") or r.filename,
             "raw_text": r.raw_text,
             "skills": extract_skills(r.raw_text or ""),
             "experience": extract_min_experience_years(r.raw_text or "")

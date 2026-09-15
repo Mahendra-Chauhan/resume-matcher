@@ -45,6 +45,7 @@ def answer_query(question, resumes):
     for r in matches:
         exp_str = f"{r['experience']} yrs" if r.get("experience") is not None else "experience unknown"
         skills_str = ", ".join(r.get("skills", [])) or "no skills detected"
-        lines.append(f"- {r['filename']}: {exp_str}, skills: {skills_str}")
+        display_name = r.get("name") or r["filename"]
+        lines.append(f"- {display_name} ({r['filename']}): {exp_str}, skills: {skills_str}")
 
     return "\n".join(lines)

@@ -6,3 +6,4 @@ pdf2image
 sentence-transformers
 numpy
 groq
+python-dotenv
