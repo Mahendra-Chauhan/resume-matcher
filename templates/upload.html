@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Matcher - Upload</title>
+</head>
+<body>
+    <h1>Upload Resumes</h1>
+
+    <!-- enctype="multipart/form-data" is required for file uploads to work -->
+    <!-- "multiple" lets the user select several PDF files at once -->
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="resumes" accept=".pdf" multiple required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- Jinja2 template syntax: loops over messages passed from app.py -->
+    {% if messages %}
+        <h2>Results:</h2>
+        <ul>
+        {% for msg in messages %}
+            <li>{{ msg }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
