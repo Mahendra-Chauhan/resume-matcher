@@ -8,14 +8,34 @@ Simple, fast, and good enough for the assignment's scale.
 
 import re
 
-# A starter list of common tech skills to look for.
+# A starter list of common skills across several domains — not just tech.
 # In a real product this would be a much bigger list, or a skills database —
 # but for the assignment, a solid keyword list is enough.
+# IMPORTANT: only skills in this list can ever show up in "matched/missing
+# skills" — if a JD or resume is about a domain not covered here, that
+# comparison will come back empty even though the semantic score still works.
+# Add more terms below as needed for your test resumes/JDs.
 SKILL_KEYWORDS = [
+    # Tech / data
     "python", "java", "javascript", "sql", "django", "flask",
     "react", "node.js", "tensorflow", "pytorch", "nlp",
     "machine learning", "deep learning", "aws", "docker", "kubernetes",
     "git", "html", "css", "c++", "excel", "power bi", "tableau",
+    # Business / administration
+    "business administration", "office administration", "data entry",
+    "ms office", "microsoft office", "powerpoint", "word", "outlook",
+    "scheduling", "record keeping", "documentation", "filing",
+    "customer service", "front desk", "reception",
+    # Management / soft skills
+    "project management", "team management", "leadership",
+    "communication", "negotiation", "problem solving", "time management",
+    "organizational skills", "multitasking",
+    # Marketing / sales
+    "digital marketing", "social media", "seo", "content writing",
+    "sales", "crm", "market research", "branding",
+    # Finance / accounting
+    "accounting", "bookkeeping", "budgeting", "financial analysis",
+    "invoicing", "payroll", "sap",
 ]
 
 
