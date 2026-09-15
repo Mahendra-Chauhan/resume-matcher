@@ -40,6 +40,27 @@ def cosine_similarity(vec_a, vec_b):
     return float(dot / norm)
 
 
+def semantic_search(query_text, candidates, top_k=5):
+    """
+    Finds the candidates whose resume text is most similar in MEANING to the
+    query — not keyword matching. Used as the chatbot's fallback for
+    open-ended questions that don't hit an exact skill/score pattern.
+
+    candidates: list of dicts, each must have an "embedding_vec" (numpy array).
+    Returns the top_k candidates, sorted by similarity (best first).
+    """
+    query_vec = get_embedding(query_text)
+    scored = []
+    for c in candidates:
+        vec = c.get("embedding_vec")
+        if vec is None:
+            continue
+        sim = cosine_similarity(query_vec, vec)
+        scored.append((sim, c))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [c for _, c in scored[:top_k]]
+
+
 def compute_match_score(resume_text, resume_skills, jd_text, jd_skills, jd_min_exp, resume_exp):
     """
     Combines semantic similarity with skill overlap into one final score (0-100).

@@ -36,6 +36,8 @@ SKILL_KEYWORDS = [
     # Finance / accounting
     "accounting", "bookkeeping", "budgeting", "financial analysis",
     "invoicing", "payroll", "sap",
+    # Graphic Designer
+    "graphic designer", "UI UX designer", "photoshop"
 ]
 
 
