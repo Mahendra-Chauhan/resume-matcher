@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Matcher</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        nav a { margin-right: 20px; font-weight: bold; text-decoration: none; }
+        nav { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #333; }
+    </style>
+</head>
+<body>
+    <!-- This nav bar appears on every page, so users click instead of typing URLs -->
+    <nav>
+        <a href="/">1. Upload Resumes</a>
+        <a href="/jd">2. Job Description</a>
+        <a href="/rank">3. Ranked Results & Chat</a>
+    </nav>
+
+    {% block content %}{% endblock %}
+</body>
+</html>
