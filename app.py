@@ -1,32 +1,25 @@
 """
-app.py — the entry point of our Flask web application.
-
-This file's only job right now is to prove Flask is installed and working.
-We'll expand it step by step as we build the real features.
+app.py — entry point. Now also sets up the database connection.
 """
 
-# Flask is the web framework — it lets Python code respond to web browser requests.
 from flask import Flask
+from models import db  # our shared db object from models.py
 
-# This creates our "application" object. Every Flask app starts with this line.
-# __name__ tells Flask where to look for things like templates and static files.
 app = Flask(__name__)
 
+# Tells Flask-SQLAlchemy where the database file lives.
+# sqlite:/// means "a local file", followed by the filename.
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///resume_matcher.db"
 
-# The @app.route decorator says: "when someone visits this URL in a browser,
-# run the function right below it."
-# "/" means the homepage — e.g. http://127.0.0.1:5000/
+# Connects our models.py db object to this specific Flask app.
+db.init_app(app)
+
+
 @app.route("/")
 def home():
-    # Whatever this function returns is what the browser displays.
     return "Resume Matcher is alive! Flask is working correctly."
 
 
-# This block only runs when you execute this file directly (python app.py),
-# not when it's imported elsewhere. It's a standard Python pattern.
 if __name__ == "__main__":
-    # debug=True auto-reloads the server when you save changes to this file,
-    # and shows helpful error pages in the browser if something breaks.
     app.run(debug=True)
-
     
