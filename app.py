@@ -2,11 +2,17 @@
 app.py — full application: upload, JD intake, ranking, and chatbot.
 """
 
+from dotenv import load_dotenv
+load_dotenv()  # reads .env and makes GROQ_API_KEY etc. available via os.environ
+
 import os
 from flask import Flask, request, render_template
 from models import db, Resume, JobDescription
 from services.extractor import extract_text
-from services.parser import extract_skills, extract_min_experience_years, extract_name
+from services.parser import (
+    extract_skills, extract_min_experience_years, extract_name,
+    extract_email, extract_phone
+)
 from services.matcher import compute_match_score, embedding_to_bytes
 from services.chatbot import answer_query
 
@@ -74,75 +80,72 @@ def job_description():
     return render_template("jd.html", extracted=extracted)
 
 
+def build_candidates(jd):
+    """
+    The single source of truth for candidate data — used by BOTH the ranked
+    table (/rank) and the chatbot (/chat), so they never fall out of sync.
+    Returns a list of dicts with everything either feature needs: score,
+    matched/missing skills, embedding vector (for semantic search), and
+    contact info (for the chatbot's direct-lookup questions).
+    """
+    resumes = Resume.query.filter(Resume.status.in_(["processed", "ocr_used"])).all()
+    jd_skills = [s.strip() for s in (jd.required_skills or "").split(",") if s.strip()] if jd else []
+
+    candidates = []
+    for r in resumes:
+        text = r.raw_text or ""
+        resume_skills = extract_skills(text)
+        resume_exp = extract_min_experience_years(text)
+
+        if jd:
+            score, matched, missing, resume_vec = compute_match_score(
+                text, resume_skills,
+                jd.raw_text or "", jd_skills,
+                jd.min_experience_years, resume_exp
+            )
+            # Cache the embedding so future requests don't recompute it.
+            r.embedding = embedding_to_bytes(resume_vec)
+            db.session.commit()
+        else:
+            score, matched, missing, resume_vec = None, [], [], None
+
+        candidates.append({
+            "name": extract_name(text) or r.filename,
+            "filename": r.filename,
+            "raw_text": text,
+            "skills": resume_skills,
+            "experience": resume_exp,
+            "email": extract_email(text),
+            "phone": extract_phone(text),
+            "score": score,
+            "matched": matched,
+            "missing": missing,
+            "embedding_vec": resume_vec,
+        })
+
+    candidates.sort(key=lambda c: c["score"] if c["score"] is not None else -1, reverse=True)
+    return candidates
+
+
 @app.route("/rank")
 def rank():
-    # Uses the most recently submitted JD and all processed resumes.
     jd = JobDescription.query.order_by(JobDescription.id.desc()).first()
     if not jd:
         return "No job description submitted yet. Go to /jd first."
 
-    resumes = Resume.query.filter(Resume.status.in_(["processed", "ocr_used"])).all()
-    jd_skills = [s.strip() for s in (jd.required_skills or "").split(",") if s.strip()]
-
-    ranked = []
-    for r in resumes:
-        resume_skills = extract_skills(r.raw_text or "")
-        resume_exp = extract_min_experience_years(r.raw_text or "")
-        score, matched, missing, resume_vec = compute_match_score(
-            r.raw_text or "", resume_skills,
-            jd.raw_text or "", jd_skills,
-            jd.min_experience_years, resume_exp
-        )
-        # Cache the embedding so we don't recompute it every time.
-        r.embedding = embedding_to_bytes(resume_vec)
-        db.session.commit()
-
-        candidate_name = extract_name(r.raw_text or "") or r.filename
-
-        ranked.append({
-            "name": candidate_name,
-            "filename": r.filename,
-            "score": score,
-            "matched": matched,
-            "missing": missing
-        })
-
-    ranked.sort(key=lambda x: x["score"], reverse=True)
+    ranked = build_candidates(jd)
     return render_template("results.html", ranked=ranked, answer=None)
 
 
 @app.route("/chat", methods=["POST"])
 def chat():
     question = request.form.get("question", "")
-
-    resumes = Resume.query.filter(Resume.status.in_(["processed", "ocr_used"])).all()
-    resume_data = []
-    for r in resumes:
-        resume_data.append({
-            "filename": r.filename,
-            "name": extract_name(r.raw_text or "") or r.filename,
-            "raw_text": r.raw_text,
-            "skills": extract_skills(r.raw_text or ""),
-            "experience": extract_min_experience_years(r.raw_text or "")
-        })
-
-    answer = answer_query(question, resume_data)
-
-    # Re-render the ranked table too, so the page doesn't go blank.
     jd = JobDescription.query.order_by(JobDescription.id.desc()).first()
-    ranked = []
-    if jd:
-        jd_skills = [s.strip() for s in (jd.required_skills or "").split(",") if s.strip()]
-        for r in resume_data:
-            score, matched, missing, _ = compute_match_score(
-                r["raw_text"] or "", r["skills"],
-                jd.raw_text or "", jd_skills,
-                jd.min_experience_years, r["experience"]
-            )
-            ranked.append({"filename": r["filename"], "score": score, "matched": matched, "missing": missing})
-        ranked.sort(key=lambda x: x["score"], reverse=True)
+    candidates = build_candidates(jd)
 
-    return render_template("results.html", ranked=ranked, answer=answer)
+    answer = answer_query(question, candidates)
+
+    return render_template("results.html", ranked=candidates, answer=answer)
 
 
 if __name__ == "__main__":

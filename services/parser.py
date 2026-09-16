@@ -17,7 +17,7 @@ import re
 # Add more terms below as needed for your test resumes/JDs.
 SKILL_KEYWORDS = [
     # Tech / data
-    "python", "java", "javascript", "sql", "generative ai", "agentic ai","langchain", "langgraph","data analysis", "data science","django", "flask", "fastapi"
+    "python", "java", "javascript", "sql", "django", "flask",
     "react", "node.js", "tensorflow", "pytorch", "nlp",
     "machine learning", "deep learning", "aws", "docker", "kubernetes",
     "git", "html", "css", "c++", "excel", "power bi", "tableau",
@@ -36,8 +36,6 @@ SKILL_KEYWORDS = [
     # Finance / accounting
     "accounting", "bookkeeping", "budgeting", "financial analysis",
     "invoicing", "payroll", "sap",
-    # Graphic Designer
-    "graphic designer", "UI UX designer", "photoshop"
 ]
 
 
@@ -77,6 +75,25 @@ def extract_name(text):
                 return line
 
     return None  # nothing matched — caller falls back to filename
+
+
+def extract_email(text):
+    """Finds the first email address in the text, or None."""
+    if not text:
+        return None
+    match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", text)
+    return match.group(0) if match else None
+
+
+def extract_phone(text):
+    """
+    Finds the first phone-number-looking sequence in the text, or None.
+    Matches common formats: +91 9876543210, 987-654-3210, (123) 456-7890, etc.
+    """
+    if not text:
+        return None
+    match = re.search(r"(\+?\d{1,3}[\s-]?)?\(?\d{3,5}\)?[\s-]?\d{3}[\s-]?\d{3,4}", text)
+    return match.group(0).strip() if match else None
 
 
 def extract_min_experience_years(text):
